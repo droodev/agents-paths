@@ -128,7 +128,7 @@ function getNeighbors(pos) {
 
 // ─── CONSTANTS ────────────────────────────────────────────────────────────────
 
-const CELL_SIZE = 90;
+const CELL_SIZE = 110;
 const AGENT_COLORS = [
   "#60a5fa","#34d399","#f472b6","#fbbf24",
   "#a78bfa","#fb923c","#38bdf8","#4ade80",
@@ -522,8 +522,8 @@ function GameGrid({ level, state, onCellClick }) {
         return (
           <div key={k} onClick={() => onCellClick(k)} style={{
             position: "absolute",
-            left: c * CELL_SIZE + 7, top: r * CELL_SIZE + 7,
-            width: CELL_SIZE - 14, height: CELL_SIZE - 14,
+            left: c * CELL_SIZE + 14, top: r * CELL_SIZE + 14,
+            width: CELL_SIZE - 28, height: CELL_SIZE - 28,
             background: bg, border, borderRadius: 10,
             display: "flex", alignItems: "center", justifyContent: "center",
             flexWrap: "wrap", gap: 4, padding: 6,
