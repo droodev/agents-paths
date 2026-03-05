@@ -128,7 +128,7 @@ function getNeighbors(pos) {
 
 // ─── CONSTANTS ────────────────────────────────────────────────────────────────
 
-const CELL_SIZE = 72;
+const CELL_SIZE = 90;
 const AGENT_COLORS = [
   "#60a5fa","#34d399","#f472b6","#fbbf24",
   "#a78bfa","#fb923c","#38bdf8","#4ade80",
@@ -522,11 +522,11 @@ function GameGrid({ level, state, onCellClick }) {
         return (
           <div key={k} onClick={() => onCellClick(k)} style={{
             position: "absolute",
-            left: c * CELL_SIZE + 5, top: r * CELL_SIZE + 5,
-            width: CELL_SIZE - 10, height: CELL_SIZE - 10,
+            left: c * CELL_SIZE + 7, top: r * CELL_SIZE + 7,
+            width: CELL_SIZE - 14, height: CELL_SIZE - 14,
             background: bg, border, borderRadius: 10,
             display: "flex", alignItems: "center", justifyContent: "center",
-            flexWrap: "wrap", gap: 3, padding: 4,
+            flexWrap: "wrap", gap: 4, padding: 6,
             cursor: (isValidMove || isDestOf || here.length > 0) ? "pointer" : "default",
             transition: "background 0.15s, border 0.15s",
             boxShadow: isValidMove ? "0 0 12px rgba(96,165,250,0.2)"
@@ -762,7 +762,7 @@ export default function HostilePathGame() {
       {/* Header */}
       <div style={{
         display: "flex", alignItems: "center", justifyContent: "space-between",
-        padding: "10px 20px", borderBottom: "1px solid #0f172a",
+        padding: "12px 28px", borderBottom: "1px solid #0f172a",
         background: "rgba(6,13,26,0.95)",
       }}>
         <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
@@ -777,7 +777,7 @@ export default function HostilePathGame() {
             <div style={{ fontSize: 15, fontWeight: 700 }}>{level.name}</div>
           </div>
         </div>
-        <div style={{ display: "flex", gap: 18 }}>
+        <div style={{ display: "flex", gap: 28 }}>
           {[
             ["Turn",   gameState.turn,          "#60a5fa"],
             ["Safe",   `${succeeded}/${level.goal}`, "#34d399"],
@@ -845,14 +845,14 @@ export default function HostilePathGame() {
       {/* Body */}
       <div style={{
         flex: 1, display: "flex", flexDirection: "column",
-        alignItems: "center", padding: "16px", gap: 14,
+        alignItems: "center", padding: "24px 20px", gap: 20,
       }}>
 
         {/* Description + hint */}
         <div style={{
-          maxWidth: 680, width: "100%",
+          maxWidth: 800, width: "100%",
           background: "rgba(15,23,42,0.7)", border: "1px solid #0f2a4a",
-          borderRadius: 8, padding: "10px 16px", fontSize: 13, color: "#94a3b8",
+          borderRadius: 8, padding: "12px 20px", fontSize: 14, color: "#94a3b8",
           textAlign: "center", lineHeight: 1.6,
         }}>
           {level.description}{" "}
@@ -869,7 +869,7 @@ export default function HostilePathGame() {
         {/* Grid */}
         <div style={{
           background: "rgba(6,13,26,0.9)", border: "1px solid #0f172a",
-          borderRadius: 16, padding: 16, overflowX: "auto",
+          borderRadius: 16, padding: 22, overflowX: "auto",
         }}>
           <GameGrid level={level} state={gameState} onCellClick={handleCellClick} />
         </div>
@@ -878,8 +878,8 @@ export default function HostilePathGame() {
         <div style={{
           display: "flex", gap: 10, alignItems: "center",
           background: "rgba(6,13,26,0.9)", border: "1px solid #0f172a",
-          borderRadius: 10, padding: "10px 18px",
-          maxWidth: 680, width: "100%",
+          borderRadius: 10, padding: "12px 22px",
+          maxWidth: 800, width: "100%",
         }}>
           <div style={{ flex: 1, fontSize: 13, color: "#475569" }}>
             {gameState.selected !== null
@@ -922,8 +922,8 @@ export default function HostilePathGame() {
         }}>
           {/* Agent roster */}
           <div style={{
-            flex: 1, minWidth: 170, background: "rgba(6,13,26,0.85)",
-            border: "1px solid #0f172a", borderRadius: 10, padding: 14,
+            flex: 1, minWidth: 190, background: "rgba(6,13,26,0.85)",
+            border: "1px solid #0f172a", borderRadius: 10, padding: 18,
           }}>
             <div style={{ fontSize: 10, color: "#334155", textTransform: "uppercase", letterSpacing: 2, marginBottom: 10 }}>Agents</div>
             <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 8 }}>
@@ -961,8 +961,8 @@ export default function HostilePathGame() {
 
           {/* Trap status */}
           <div style={{
-            flex: 1, minWidth: 170, background: "rgba(6,13,26,0.85)",
-            border: "1px solid #0f172a", borderRadius: 10, padding: 14,
+            flex: 1, minWidth: 190, background: "rgba(6,13,26,0.85)",
+            border: "1px solid #0f172a", borderRadius: 10, padding: 18,
           }}>
             <div style={{ fontSize: 10, color: "#334155", textTransform: "uppercase", letterSpacing: 2, marginBottom: 10 }}>Traps</div>
             {Object.entries(gameState.traps).map(([k, trap]) => (
@@ -983,8 +983,8 @@ export default function HostilePathGame() {
 
           {/* Log */}
           <div style={{
-            flex: 2, minWidth: 200, background: "rgba(6,13,26,0.85)",
-            border: "1px solid #0f172a", borderRadius: 10, padding: 14,
+            flex: 2, minWidth: 220, background: "rgba(6,13,26,0.85)",
+            border: "1px solid #0f172a", borderRadius: 10, padding: 18,
           }}>
             <div style={{ fontSize: 10, color: "#334155", textTransform: "uppercase", letterSpacing: 2, marginBottom: 10 }}>Event Log</div>
             {gameState.log.map((msg, i) => (
