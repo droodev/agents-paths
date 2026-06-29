@@ -573,7 +573,8 @@ function GameGrid({ level, state, onCellClick }) {
   const succeededAgents = state.agents.filter(a => a.atTarget);
 
   const W = level.grid.cols * CELL_SIZE;
-  const H = level.grid.rows * CELL_SIZE;
+  const startExtra = CELL_SIZE * 0.45;
+  const H = level.grid.rows * CELL_SIZE + startExtra;
   const nodes = Array.from(currentGraph.nodes);
 
   // Build edge lines for SVG
