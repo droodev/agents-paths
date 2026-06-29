@@ -574,7 +574,7 @@ function GameGrid({ level, state, onCellClick }) {
 
   const W = level.grid.cols * CELL_SIZE;
   const startExtra = CELL_SIZE * 0.45;
-  const H = level.grid.rows * CELL_SIZE + startExtra;
+  const H = level.grid.rows * CELL_SIZE;
   const nodes = Array.from(currentGraph.nodes);
 
   // Build edge lines for SVG
@@ -588,8 +588,8 @@ function GameGrid({ level, state, onCellClick }) {
         const [c,  r ] = parseKey(k);
         const [nc, nr] = parseKey(nk);
         edgeLines.push({
-          x1: c  * CELL_SIZE + CELL_SIZE / 2, y1: r  * CELL_SIZE + CELL_SIZE / 2,
-          x2: nc * CELL_SIZE + CELL_SIZE / 2, y2: nr * CELL_SIZE + CELL_SIZE / 2,
+          x1: c  * CELL_SIZE + CELL_SIZE / 2, y1: r  * CELL_SIZE + CELL_SIZE / 2 + startExtra,
+          x2: nc * CELL_SIZE + CELL_SIZE / 2, y2: nr * CELL_SIZE + CELL_SIZE / 2 + startExtra,
         });
       }
     });
