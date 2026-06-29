@@ -976,7 +976,7 @@ export default function HostilePathGame() {
   const fixedChrome = 600;
   const startCellExtra = Math.round(CELL_SIZE * 0.45) * 2; // start cell protrudes above+below
   const gridHeight = level.grid.rows * CELL_SIZE + startCellExtra + 44;
-  const requiredHeight = fixedChrome + gridHeight;
+  const requiredHeight = fixedChrome + gridHeight*2;
 
   return (
     <div style={{
