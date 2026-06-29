@@ -759,17 +759,46 @@ export default function HostilePathGame() {
 
       const here = prev.agents.filter(a => a.alive && !a.atTarget && a.pos === targetPos);
 
+      const startPos = cellKey(level.start.col, level.start.row);
+
+      // Leaders-only filter: an agent is selectable if it is the leader of its party
+      // (index === 0) or has no party (solo agents are their own leader).
+      const isLeader = (agent) => {
+        const mem = agentParty(prev.parties || [], agent.id);
+        return !mem || mem.index === 0;
+      };
+
       // Nothing selected — try to select an agent here
       if (prev.selected === null) {
-        if (here.length > 0) return { ...prev, selected: here[0].id };
+        if (here.length > 0) {
+          // On the start vertex prefer the first leader; elsewhere take the first agent as before.
+          if (targetPos === startPos) {
+            const firstLeader = here.find(isLeader);
+            if (firstLeader) return { ...prev, selected: firstLeader.id };
+            return prev; // no leader here yet (shouldn't happen)
+          }
+          return { ...prev, selected: here[0].id };
+        }
         return prev;
       }
 
       const selAgent = prev.agents[prev.selected];
 
-      // Clicked the currently selected agent's own cell — deselect
+      // Clicked the currently selected agent's own cell — deselect or cycle to next leader
       if (selAgent.pos === targetPos) {
-        // Also cancel pending move for this agent if any
+        // On the start vertex with multiple leaders: cycle to the next selectable leader
+        if (targetPos === startPos) {
+          const leaders = here.filter(isLeader);
+          if (leaders.length > 1) {
+            const curIdx = leaders.findIndex(a => a.id === prev.selected);
+            const nextLeader = leaders[(curIdx + 1) % leaders.length];
+            // If we've wrapped back to the current, deselect instead
+            if (nextLeader.id !== prev.selected) {
+              return { ...prev, selected: nextLeader.id };
+            }
+          }
+        }
+        // Default: deselect and cancel pending move for this agent
         const pm = { ...prev.pendingMoves };
         delete pm[prev.selected];
         return { ...prev, selected: null, pendingMoves: pm };
@@ -777,6 +806,12 @@ export default function HostilePathGame() {
 
       // Clicked an agent on a non-neighboring cell — switch selection
       if (here.length > 0 && !getNeighbors(selAgent.pos).includes(targetPos)) {
+        // On the start vertex, only switch to a leader
+        if (targetPos === startPos) {
+          const nextLeader = here.find(a => isLeader(a) && a.id !== prev.selected);
+          if (nextLeader) return { ...prev, selected: nextLeader.id };
+          return prev;
+        }
         return { ...prev, selected: here[0].id };
       }
 
@@ -886,7 +921,7 @@ export default function HostilePathGame() {
           background: "linear-gradient(130deg,#60a5fa 0%,#34d399 100%)",
           WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", letterSpacing: -1,
         }}>HOSTILE PATH</h1>
-        <p style={{ fontSize: 14, color: "#64748b", marginBottom: 32, lineHeight: 1.7 }}>
+        <p style={{ fontSize: 14, color: "#cccccc", marginBottom: 32, lineHeight: 1.7 }}>
           Route agents simultaneously through hazardous terrain.<br />
           Sacrifice some to open the way for the rest.
         </p>
@@ -927,7 +962,7 @@ export default function HostilePathGame() {
         </div>
 
         <p style={{ marginTop: 40, fontSize: 11, color: "#1e3a5f", lineHeight: 1.6 }}>
-          Based on <i style={{ color: "#334155" }}>"Optimal Path Planning in Hostile Environments"</i><br />
+          Based on <i style={{ color: "#cccccc" }}>"Optimal Path Planning in Hostile Environments"</i><br />
           Kaczmarczyk · Schierreich · Tanujaya · Xu · ICAPS 2026
         </p>
       </div>
@@ -964,7 +999,7 @@ export default function HostilePathGame() {
                   </div>
                   <div style={{ fontSize: 12, color: "#475569", marginTop: 3 }}>{lvl.description}</div>
                 </div>
-                <div style={{ fontSize: 11, color: "#334155", textAlign: "right", flexShrink: 0, marginLeft: 12 }}>
+                <div style={{ fontSize: 11, color: "#cccccc", textAlign: "right", flexShrink: 0, marginLeft: 12 }}>
                   <div>{lvl.agents} agents</div>
                   <div>Goal: {lvl.goal}</div>
                 </div>
@@ -1009,7 +1044,7 @@ export default function HostilePathGame() {
       }}>
         <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
           <button onClick={() => setScreen("menu")} style={{
-            background: "none", border: "none", color: "#334155",
+            background: "none", border: "none", color: "#cccccc",
             fontSize: 13, fontFamily: "monospace", cursor: "pointer",
           }}>← MENU</button>
           <div>
@@ -1027,7 +1062,7 @@ export default function HostilePathGame() {
             ["Lost",   deadCount,               "#ef4444"],
           ].map(([label, val, color]) => (
             <div key={label} style={{ textAlign: "center" }}>
-              <div style={{ fontSize: 9, color: "#334155", textTransform: "uppercase", letterSpacing: 1 }}>{label}</div>
+              <div style={{ fontSize: 9, color: "#cccccc", textTransform: "uppercase", letterSpacing: 1 }}>{label}</div>
               <div style={{ fontSize: 18, fontWeight: 900, color }}>{val}</div>
             </div>
           ))}
@@ -1049,7 +1084,7 @@ export default function HostilePathGame() {
             <div style={{ fontSize: 22, fontWeight: 900, color: isWon ? "#34d399" : "#ef4444", marginBottom: 8 }}>
               {isWon ? "MISSION COMPLETE" : "MISSION FAILED"}
             </div>
-            <div style={{ fontSize: 13, color: "#64748b", marginBottom: 8 }}>
+            <div style={{ fontSize: 13, color: "#cccccc", marginBottom: 8 }}>
               {isWon
                 ? `${succeeded} agents reached safety in ${gameState.turn} turns.`
                 : `Only ${succeeded}/${level.goal} agents made it.`}
@@ -1062,7 +1097,7 @@ export default function HostilePathGame() {
             <div style={{ display: "flex", gap: 10, justifyContent: "center", flexWrap: "wrap" }}>
               <button onClick={() => startLevel(levelIdx)} style={{
                 padding: "10px 20px", background: "rgba(15,23,42,0.9)",
-                border: "1px solid #334155", borderRadius: 8, color: "#94a3b8",
+                border: "1px solid #cccccc", borderRadius: 8, color: "#94a3b8",
                 fontSize: 13, fontFamily: "monospace", cursor: "pointer",
               }}>↺ RETRY</button>
               {isWon && levelIdx + 1 < LEVELS.length && (
@@ -1119,7 +1154,7 @@ export default function HostilePathGame() {
               <div style={{ fontSize: 11, color: "#60a5fa", textTransform: "uppercase", letterSpacing: 2, fontFamily: "monospace" }}>
                 🚂 Party Setup
               </div>
-              <div style={{ fontSize: 12, color: "#64748b", flex: 1 }}>
+              <div style={{ fontSize: 12, color: "#cccccc", flex: 1 }}>
                 {partySetup.activePartyId === null
                   ? "Create a party, then click agents to add them. First added = leader (⭐). Click an existing member to make them leader."
                   : `Party ${partySetup.parties.findIndex(p => p.id === partySetup.activePartyId) + 1} active — click agents below to add/remove. Click a member again to promote as leader.`}
@@ -1166,7 +1201,7 @@ export default function HostilePathGame() {
                   ))}
                 </div>
                 {party.memberIds.length === 0 && (
-                  <span style={{ fontSize: 11, color: "#334155", fontStyle: "italic" }}>no members yet</span>
+                  <span style={{ fontSize: 11, color: "#cccccc", fontStyle: "italic" }}>no members yet</span>
                 )}
               </div>
             ))}
@@ -1223,7 +1258,20 @@ export default function HostilePathGame() {
         }}>
           <div style={{ flex: 1, fontSize: 13, color: "#475569" }}>
             {gameState.selected !== null
-              ? `Agent ${gameState.selected + 1} selected — click a neighboring cell to queue a move`
+              ? (() => {
+                  const selAgent = gameState.agents[gameState.selected];
+                  const startPos = cellKey(level.start.col, level.start.row);
+                  const onStart = selAgent?.pos === startPos;
+                  const leadersAtStart = onStart
+                    ? gameState.agents.filter(a => {
+                        if (!a.alive || a.atTarget || a.pos !== startPos) return false;
+                        const mem = agentParty(gameState.parties || [], a.id);
+                        return !mem || mem.index === 0;
+                      })
+                    : [];
+                  const canCycle = leadersAtStart.length > 1;
+                  return `Agent ${gameState.selected + 1} selected — click a neighboring cell to queue a move${canCycle ? " · click START again to cycle agents" : ""}`;
+                })()
               : queuedCount > 0
                 ? `${queuedCount} move${queuedCount > 1 ? "s" : ""} queued — add more or execute`
                 : "Click an agent to select it, then click a neighbor to queue a move"}
@@ -1233,7 +1281,7 @@ export default function HostilePathGame() {
             disabled={queuedCount === 0 && gameState.selected === null}
             style={{
               padding: "8px 14px", background: "rgba(15,23,42,0.8)",
-              border: "1px solid #334155", borderRadius: 6, color: "#64748b",
+              border: "1px solid #334155", borderRadius: 6, color: "#cccccc",
               fontSize: 12, fontFamily: "monospace", cursor: "pointer",
               opacity: queuedCount === 0 ? 0.4 : 1,
             }}
@@ -1265,7 +1313,7 @@ export default function HostilePathGame() {
             flex: 1, minWidth: 190, background: "rgba(24,48,90,0.85)",
             border: "1px solid #2e5aaa", borderRadius: 10, padding: 18,
           }}>
-            <div style={{ fontSize: 10, color: "#334155", textTransform: "uppercase", letterSpacing: 2, marginBottom: 10 }}>Agents</div>
+            <div style={{ fontSize: 10, color: "#cccccc", textTransform: "uppercase", letterSpacing: 2, marginBottom: 10 }}>Agents</div>
             <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 8 }}>
               {gameState.agents.map(a => {
                 const hasPending = gameState.pendingMoves[a.id] !== undefined;
@@ -1297,7 +1345,7 @@ export default function HostilePathGame() {
                 );
               })}
             </div>
-            <div style={{ fontSize: 11, color: "#334155" }}>
+            <div style={{ fontSize: 11, color: "#cccccc" }}>
               Gold border = move queued
             </div>
           </div>
@@ -1307,7 +1355,7 @@ export default function HostilePathGame() {
             flex: 1, minWidth: 190, background: "rgba(24,48,90,0.85)",
             border: "1px solid #2e5aaa", borderRadius: 10, padding: 18,
           }}>
-            <div style={{ fontSize: 10, color: "#334155", textTransform: "uppercase", letterSpacing: 2, marginBottom: 10 }}>Traps</div>
+            <div style={{ fontSize: 10, color: "#cccccc", textTransform: "uppercase", letterSpacing: 2, marginBottom: 10 }}>Traps</div>
             {Object.entries(gameState.traps).map(([k, trap]) => (
               <div key={k} style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 7 }}>
                 <div style={{
@@ -1329,7 +1377,7 @@ export default function HostilePathGame() {
             flex: 2, minWidth: 220, background: "rgba(24,48,90,0.85)",
             border: "1px solid #2e5aaa", borderRadius: 10, padding: 18,
           }}>
-            <div style={{ fontSize: 10, color: "#334155", textTransform: "uppercase", letterSpacing: 2, marginBottom: 10 }}>Event Log</div>
+            <div style={{ fontSize: 10, color: "#cccccc", textTransform: "uppercase", letterSpacing: 2, marginBottom: 10 }}>Event Log</div>
             {gameState.log.map((msg, i) => (
               <div key={i} style={{
                 fontSize: 12, lineHeight: 1.4, marginBottom: 4,
