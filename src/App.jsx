@@ -217,7 +217,7 @@ function initState(level) {
     parties: [],           // [{ id, color, memberIds: [leaderId, ...rest] }]
     partySetupDone: false, // locked after first execute
     turn: 0,
-    phase: "playing",
+    phase: "setup",
     log: ["Optionally form parties, then plan moves and press ▶ Execute Turn."],
   };
 }
@@ -603,9 +603,9 @@ function GameGrid({ level, state, onCellClick }) {
     const [dc, dr] = parseKey(dest);
     return {
       x1: sc * CELL_SIZE + CELL_SIZE / 2,
-      y1: sr * CELL_SIZE + CELL_SIZE / 2 + startEdge,
+      y1: sr * CELL_SIZE + CELL_SIZE / 2 + startExtra,
       x2: dc * CELL_SIZE + CELL_SIZE / 2,
-      y2: dr * CELL_SIZE + CELL_SIZE / 2 + startEdge,
+      y2: dr * CELL_SIZE + CELL_SIZE / 2 + startExtra,
       color: a.color,
     };
   }).filter(Boolean);
@@ -850,7 +850,22 @@ export default function HostilePathGame() {
   const handleConfirmParties = useCallback(() => {
     if (!partySetup) return;
     const validParties = partySetup.parties.filter(p => p.memberIds.length >= 2);
-    setGameState(prev => prev ? { ...prev, parties: validParties } : prev);
+
+    // Agents already assigned to a party
+    const assigned = new Set(
+      validParties.flatMap(p => p.memberIds)
+    );
+
+    // One-agent parties for everyone else
+    const singletonParties = gameState.agents
+      .filter(a => !assigned.has(a.id))
+      .map(a => ({
+        id: `solo-${a.id}`,
+        color: a.color,      // or any other color you prefer
+        memberIds: [a.id],
+      }));
+
+    setGameState(prev => prev ? { ...prev, parties: [...validParties, ...singletonParties], phase: "playing", } : prev);
     setPartySetup(null);
   }, [partySetup]);
 
