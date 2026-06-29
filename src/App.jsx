@@ -1193,7 +1193,7 @@ export default function HostilePathGame() {
         {/* Grid */}
         <div style={{
           background: "rgba(24,48,90,0.9)", border: "1px solid #2e5aaa",
-          borderRadius: 16, padding: 22, overflowX: "auto", minHeight: `${GridHeigth}px` ,
+          borderRadius: 16, padding: 22, overflowX: "auto", minHeight: `${gridHeigth}px` ,
         }}>
           <GameGrid level={level} state={gameState} onCellClick={handleCellClick} />
         </div>
