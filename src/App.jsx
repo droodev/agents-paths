@@ -603,9 +603,9 @@ function GameGrid({ level, state, onCellClick }) {
     const [dc, dr] = parseKey(dest);
     return {
       x1: sc * CELL_SIZE + CELL_SIZE / 2,
-      y1: sr * CELL_SIZE + CELL_SIZE / 2,
+      y1: sr * CELL_SIZE + CELL_SIZE / 2 + startEdge,
       x2: dc * CELL_SIZE + CELL_SIZE / 2,
-      y2: dr * CELL_SIZE + CELL_SIZE / 2,
+      y2: dr * CELL_SIZE + CELL_SIZE / 2 + startEdge,
       color: a.color,
     };
   }).filter(Boolean);
