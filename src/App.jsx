@@ -976,7 +976,7 @@ export default function HostilePathGame() {
   const fixedChrome = 600;
   const startCellExtra = Math.round(CELL_SIZE * 0.45) * 2; // start cell protrudes above+below
   const gridHeight = level.grid.rows * CELL_SIZE + startCellExtra + 44;
-  const requiredHeight = fixedChrome + gridHeight*2;
+  const requiredHeight = fixedChrome + gridHeight;
 
   return (
     <div style={{
@@ -1193,7 +1193,7 @@ export default function HostilePathGame() {
         {/* Grid */}
         <div style={{
           background: "rgba(24,48,90,0.9)", border: "1px solid #2e5aaa",
-          borderRadius: 16, padding: 22, overflowX: "auto",
+          borderRadius: 16, padding: 22, overflowX: "auto", minHeight: `${GridHeigth}px` ,
         }}>
           <GameGrid level={level} state={gameState} onCellClick={handleCellClick} />
         </div>
